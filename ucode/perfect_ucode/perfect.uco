@@ -1,0 +1,65 @@
+main       fun  5  2  2  
+           sym  2  1  1  ; int i
+           sym  2  2  1  ; int j
+           sym  2  3  1  ; int k
+           sym  2  4  1  ; int rem
+           sym  2  5  1  ; int sum
+           ldc  2        ; load 2
+           str  2  1     ; i = 2
+top_ctl    nop 
+           lod  2  1     ; load i
+           ldc  500      ; load max : 500
+           le            ; i <= max
+           fjp  end_top  ; while(i <= max)
+           ldc  0        ; load 0
+           str  2  5     ; sum = 0
+           lod  2  1     ; load i
+           ldc  2        ; load 2
+           div           ; i / 2
+           str  2  3     ; k = i / 2
+           ldc  1        ; load 1
+           str  2  2     ; j = 1
+add_meas   nop
+           lod  2  2     ; load j
+           lod  2  3     ; load k
+           le            ; j <= k
+           fjp  chk_perf ; while(j <= k)
+           lod  2  1     ; load i 
+           lod  2  2     ; load j
+           mod           ; i % j
+           str  2  4     ; rem = i % j
+           lod  2  4     ; load rem
+           ldc  0        ; load 0
+           eq            ; rem == 0
+           fjp  next_ms  ; if(rem == 0)
+           lod  2  5     ; load sum
+           lod  2  2     ; load j
+           add           ; sum + j
+           str  2  5     ; sum = sum + j
+next_ms    nop
+           lod  2  2     ; load j
+           ldc  1        ; load 1
+           add           ; j + 1
+           str  2  2     ; j = j + 1
+           ujp  add_meas ; while(j <= k) close
+chk_perf   nop
+           lod  2  1     ; load i
+           lod  2  5     ; load sum
+           eq            ; i == sum
+           fjp  meas_end ; if(i == sum)
+           ldp
+           lod  2  1     ; load i
+           call  write   ; write(i)
+meas_end   nop
+           lod  2  1     ; load i
+           ldc  1        ; load 1
+           add           ; i + 1
+           str  2  1     ; i = i + 1
+           ujp  top_ctl  ; while(i <= max)
+end_top    nop
+           ret
+           end
+           bgn  0
+           ldp
+           call  main
+           end

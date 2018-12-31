@@ -4,6 +4,7 @@
 #include "scanner.c"
 #include "MiniC.tbl"
 #include "parser.h"
+extern FILE *astFile;
 
 void semantic(int n){
 	printf("reduced rule number = %d\n",n);
@@ -77,22 +78,31 @@ void printNode(Node *pt,int indent){
 	//extern FILE * astFile; 
 	int i;
 
-	for(i = 1; i < indent; i++)
+	for(i = 1; i < indent; i++){
 		printf(" ");
+		fprintf(astFile," ");
+	}
 
 	if(pt -> noderep == terminal){
-		if(pt -> token.number == tident)
+		if(pt -> token.number == tident){
 			printf(" Terminal : %s", pt -> token.value.id);
-		else if(pt -> token.number == tnumber)
+			fprintf(astFile," Terminal : %s", pt -> token.value.id);
+		}
+
+		else if(pt -> token.number == tnumber){
 			printf(" Terminal : %d", pt -> token.value.num);
+			fprintf(astFile," Terminal : %d", pt -> token.value.num);
+		}
 	}
 
 	else {
 		int i;
 		i = (int) (pt -> token.number);
 		printf(" Nonterminal : %s", nodeName[i]);
+		fprintf(astFile," Terminal : %s", nodeName[i]);
 	}
 	printf("\n");
+	fprintf(astFile,"\n");	
 }
 
 void printTree(Node *pt, int indent){
@@ -138,7 +148,7 @@ Node *parser(){
 				//printf("*** valid source ***\n");
 				return valueStack[sp - 1];
 			}
-			//semantic(ruleNumber);
+			semantic(ruleNumber);
 			ptr = buildTree(ruleName[ruleNumber], rightLength[ruleNumber]);
 			sp = sp - rightLength[ruleNumber];
 			lhs = leftSymbol[ruleNumber];
@@ -153,12 +163,4 @@ Node *parser(){
 			exit(1);
 		}
 	}
-}
-
-
-void main (int argc,char *argv[]){
-	printf("start of parser\n");
-	printTree(parser(),0);
-	printf("end of parser\n");
-
 }

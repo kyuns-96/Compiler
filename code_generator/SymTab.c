@@ -1,11 +1,13 @@
 /***************************************************************
  *      Symbol Table Management Routine                        *
  ***************************************************************/
-
+#pragma once
 #define HASH_BUCKET_SIZE 97
 #define SYMTAB_SIZE 200
 #define LEVEL_STACK_SIZE 10
 #define LABEL_SIZE 12
+
+extern FILE *ucodeFile;
 
 void initSymbolTable();
 int hash(char *);
@@ -53,30 +55,35 @@ int levelTop;
 int base, offset;
 
 void emitSym(int base, int offset, int size) {
-	//fprintf(file, "           %d %d %d\n", base, offset, size);
-	printf("           %d %d %d\n", base, offset, size);
+	fprintf(ucodeFile, "           sym %d %d %d\n", base, offset, size);
+	printf("           sym %d %d %d\n", base, offset, size);
 }
 
 
 void emitJump(char *value, char *label) {
-	//fprintf(file, "          %s %s\n", value, label);
-	printf("          %s %s\n", value, label);
+	fprintf(ucodeFile, "           %s %s\n", value, label);
+	printf("           %s %s\n", value, label);
 }
 
 
 void emit0(char *value){
-	//fprintf(ucodeFile,"           %s\n",value);
-	printf("           %s %d\n",value);
+	fprintf(ucodeFile,"           %s\n",value);
+	printf("           %s\n",value);
 }
 
 void emit1(char *value,int p){
-	//fprintf(ucodeFile,"           %s %d\n",value,p);
+	fprintf(ucodeFile,"           %s %d\n",value,p);
 	printf("           %s %d\n",value,p);
 }
 
 void emit2(char *value,int p,int q){
-	//fprintf(ucodeFile,"           %s %d\n",value,p,q);
-	printf("           %s %d\n",value,p,q);
+	fprintf(ucodeFile,"           %s %d %d\n",value,p,q);
+	printf("           %s %d %d\n",value,p,q);
+}
+
+void emitFunc(char *value,int p,int q,int r){
+	fprintf(ucodeFile,"           %s %d %d %d\n",value,p,q,r);
+	printf("           %s %d %d %d\n",value,p,q,r);
 }
 
 void genLabel(char *label) {
@@ -85,8 +92,8 @@ void genLabel(char *label) {
 }
 
 void emitLabel(char *label){
-	//fprintf(ucodeFile,"%s nop\n",label);
-	printf("%s nop\n",label);
+	fprintf(ucodeFile,"%-10s nop\n",label);
+	printf("%-10s nop\n",label);
 }
 
 void icg_error(int err){
@@ -165,9 +172,9 @@ int insert(char *symbol, int specifier, int qualifier, int base, int offset,
 	int i;
 
 	hashValue = hash(symbol);
-	for (i=hashBucket[hashValue]; i >= 0 &&
-		                          strcmp(symbol, symbolTable[i].symbolName); )
+	for (i=hashBucket[hashValue]; i >= 0 && strcmp(symbol, symbolTable[i].symbolName);)
 		i = symbolTable[i].nextIndex;
+
 	if ((i >= 0) && (base == symbolTable[i].base)) {	// found
 		printf("multiply defined identifier : %s\n", symbol);
 

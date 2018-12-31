@@ -1,0 +1,167 @@
+
+ line       object           ucode  source program
+
+   1    (35  105    2)     main       func  105  2  2
+   2    (38    2    1)                sym  2  1  100     ; int list[100]
+   3    (38    2  101)                sym  2  101  1     ; int element
+   4    (38    2  102)                sym  2  102  1     ; int total
+   5    (38    2  103)                sym  2  103  1     ; int i
+   6    (38    2  104)                sym  2  104  1     ; int top
+   7    (38    2  105)                sym  2  105  1     ; int temp
+   8    (20    1     )                ldc  1             ; load 1
+   9    (24    2  103)                str  2  103        ; i = 1
+  10    (23          )                ldp
+  11    (21    2  101)                lda  2  101        ; parameter-element
+  12    (29   -1     )                call read          ; read(element)
+  13    (34          )     arr_insert nop
+  14    (19    2  101)                lod  2  101        ; load element
+  15    (20    0     )                ldc  0             ; load 0
+  16    (18          )                ne                 ; element != 0
+  17    (28   32     )                fjp  arr_close     ; while(element != 0)
+  18    (19    2  103)                lod  2  103        ; load i
+  19    (21    2    1)                lda  2  1          ; load list
+  20    ( 6          )                add                ; list[i]
+  21    (19    2  101)                lod  2  101        ; load element
+  22    (25          )                sti                ; list[i] = element
+  23    (19    2  103)                lod  2  103        ; i
+  24    (20    1     )                ldc  1             ; load i
+  25    ( 6          )                add                ; i + 1
+  26    (24    2  103)                str  2  103        ; i = i + 1
+  27    (23          )                ldp 
+  28    (21    2  101)                lda  2  101        ; parameter-element
+  29    (29   -1     )                call read          ; read(element)
+  30    (23          )                ldp
+  31    (26   13     )                ujp  arr_insert    ; while(element != 0) close
+  32    (34          )     arr_close  nop
+  33    (19    2  103)                lod  2  103        ; load i
+  34    (20    1     )                ldc  1             ; load 1
+  35    ( 7          )                sub                ; i - 1
+  36    (24    2  103)                str  2  103        ; i = i - 1
+  37    (19    2  103)                lod  2  103
+  38    (19    2  103)                lod  2  103
+  39    (24    2  104)                str  2  104        ; top = i - 1
+  40    (24    2  102)                str  2  102        ; total = i - 1
+  41    (34          )     top_ctl    nop
+  42    (19    2  104)                lod  2  104        ; load top
+  43    (20    1     )                ldc  1             ; load 1
+  44    (13          )                gt
+  45    (28   99     )                fjp  end_top       ; while(top > 1)
+  46    (20    1     )                ldc  1             ; load 1
+  47    (24    2  103)                str  2  103        ; i = 1
+  48    (34          )     start_swap nop
+  49    (19    2  103)                lod  2  103        ; load i
+  50    (19    2  104)                lod  2  104        ; load top
+  51    (14          )                lt                 ; i < top
+  52    (28   93     )                fjp  end_swap      ; while(i < top)
+  53    (19    2  103)                lod  2  103        ; load i
+  54    (21    2    1)                lda  2  1          ; load list
+  55    ( 6          )                add                ; list[i]
+  56    (22          )                ldi                ; load list[i]
+  57    (19    2  103)                lod  2  103        ; load i
+  58    (20    1     )                ldc  1             ; load 1
+  59    (21    2    1)                lda  2  1          ; load list
+  60    ( 6          )                add
+  61    ( 6          )                add                ; list[i + 1]
+  62    (22          )                ldi                ; load list[i + 1]
+  63    (13          )                gt                 ; list[i] > list[i+1]
+  64    (28   87     )                fjp  bubble        ; if(list[i] > list[i+1]) is false
+  65    (19    2  103)                lod  2  103        ; load i
+  66    (21    2    1)                lda  2  1          ; load list
+  67    ( 6          )                add                ; list[i]
+  68    (22          )                ldi                ; load list[i]
+  69    (24    2  105)                str  2  105        ; temp = list[i]        
+  70    (19    2  103)                lod  2  103        ; load i
+  71    (21    2    1)                lda  2  1          ; load list
+  72    ( 6          )                add                ; list[i]
+  73    (19    2  103)                lod  2  103        ; load i
+  74    (20    1     )                ldc  1             ; load 1
+  75    (21    2    1)                lda  2  1          ; load list
+  76    ( 6          )                add
+  77    ( 6          )                add                ; list[i + 1] 
+  78    (22          )                ldi                ; load list[i+1]
+  79    (25          )                sti                ; list[i] = list[i + 1]
+  80    (19    2  103)                lod  2  103        ; load i
+  81    (20    1     )                ldc  1             ; i + 1
+  82    (21    2    1)                lda  2  1          ; load list
+  83    ( 6          )                add
+  84    ( 6          )                add                ; list[i + 1]
+  85    (19    2  105)                lod  2  105        ; load temp
+  86    (25          )                sti                ; list[i + 1] = temp;
+  87    (34          )     bubble     nop
+  88    (19    2  103)                lod  2  103        ; load i
+  89    (20    1     )                ldc  1             ; i + 1
+  90    ( 6          )                add
+  91    (24    2  103)                str  2  103        ; i = i + 1
+  92    (26   48     )                ujp start_swap     ; while(i < top) close
+  93    (34          )     end_swap   nop
+  94    (19    2  104)                lod  2  104        ; load top
+  95    (20    1     )                ldc  1             ; load 1
+  96    ( 7          )                sub                ; top - 1
+  97    (24    2  104)                str  2  104        ; top = top - 1
+  98    (26   41     )                ujp top_ctl        ; while(top > 1) close
+  99    (34          )     end_top    nop
+ 100    (20    1     )                ldc  1             ; load 1
+ 101    (24    2  103)                str  2  103        ; i = 1
+ 102    (34          )     print_arr  nop
+ 103    (19    2  103)                lod  2  103        ; load i
+ 104    (19    2  102)                lod  2  102        ; load total
+ 105    (16          )                le                 ; i <= total
+ 106    (28  118     )                fjp exit           ; exit           
+ 107    (23          )                ldp
+ 108    (19    2  103)                lod  2  103        ; load i
+ 109    (21    2    1)                lda  2  1          ; load list
+ 110    ( 6          )                add                ; list[i] 
+ 111    (22          )                ldi 
+ 112    (29   -2     )                call write         ; write(list[i])
+ 113    (19    2  103)                lod  2  103        ; load i
+ 114    (20    1     )                ldc  1             ; i + 1
+ 115    ( 6          )                add                
+ 116    (24    2  103)                str  2  103        ; i = i + 1
+ 117    (26  102     )                ujp print_arr      ; print_arr
+ 118    (34          )     exit       nop
+ 119    (30          )                ret
+ 120    (36          )                end
+ 121    (37    0     )                bgn  0
+ 122    (23          )                ldp
+ 123    (29    1     )                call  main
+ 124    (36          )                end
+
+
+
+   ****    Result    ****
+
+
+ 2 5 9 52 125
+
+   **********************
+
+
+
+
+                 #### Statistics ####
+
+
+    ****  Static Instruction Counts  ****
+
+
+add    =  14      sub    =  2       gt     =  2       lt     =  1       
+le     =  1       ne     =  1       lod    =  23      ldc    =  13      
+lda    =  10      ldi    =  5       ldp    =  5       str    =  11      
+sti    =  3       ujp    =  4       fjp    =  5       call   =  4       
+ret    =  1       nop    =  9       func   =  1       end    =  2       
+bgn    =  1       sym    =  6       
+
+
+  ****  Dynamic instruction counts  ****
+
+
+add    =  84        sub    =  5         gt     =  15        lt     =  14        
+le     =  6         ne     =  6         lod    =  133       ldc    =  60        
+lda    =  52        ldi    =  33        ldp    =  17        str    =  37        
+sti    =  13        ujp    =  24        fjp    =  41        call   =  12        
+ret    =  1         nop    =  48        func   =  1         end    =  1         
+bgn    =  1         sym    =  6         
+
+ Executable instruction count  =   554
+
+ Total execution cycle         =   4820

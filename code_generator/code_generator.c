@@ -1,9 +1,18 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include "scanner.c"
 #include "parser.c"
 #include "SymTab.c"
 #include "code_generator.h"
+
+extern FILE *ucodeFile;
+int base = 0;
+int offest = 0;
+int width = 0;
+int lvalue = 0;
+int rvalue = 0;
+int flag = 0;
 
 void processDeclaration(Node *ptr) {
 	int typeSpecifier;
@@ -59,6 +68,7 @@ void processSimpleVariable(Node *ptr, int typeSpecifier, int typeQualifier) {
 	Node *p = ptr -> son;
 	Node *q = ptr -> brother;
 	int stIndex, size, initialValue;
+	size = 1;
 
 	if(ptr -> token.number != SIMPLE_VAR)
 		printf("error in SIMPLE_VAR\n");
@@ -75,11 +85,11 @@ void processSimpleVariable(Node *ptr, int typeSpecifier, int typeQualifier) {
 		}
 
 		initialValue = sign * (q -> token.value.num);
-		stIndex = insert(p -> token.value.id, typeSpecifier, typeQualifier, 0/* base */, 0/* offset */, 0/* width */, initialValue);
+		stIndex = insert(p -> token.value.id, typeSpecifier, typeQualifier, 0/* base */, 0/* offset */, width/* width */, initialValue);
+
 	} else {
-		size = typeSize(typeSpecifier); 
-		stIndex = insert(p -> token.value.id, typeSpecifier, typeQualifier, symbolTable[symbolTableTop].base, symbolTable[symbolTableTop].offset, symbolTable[symbolTableTop].width, 0);
-		symbolTable[symbolTableTop].offset += size;
+		stIndex = insert(p -> token.value.id, typeSpecifier, typeQualifier, base, offset, size, 0);
+		offset++;
     }
 }
 
@@ -99,10 +109,10 @@ void processArrayVariable(Node *ptr, int typeSpecifier, int typeQualifier) {
 	else
 		size = p -> brother -> token.value.num;
 
-	size *= typeSize(typeSpecifier);
+	stIndex = insert(p -> token.value.id, typeSpecifier, typeQualifier, base, offset, size, 0);
 
-	stIndex = insert(p -> token.value.id, typeSpecifier, typeQualifier, base, offset, width, 0);
 	offset += size;
+
 }
 
 void processOperator(Node *ptr) {
@@ -114,18 +124,26 @@ void processOperator(Node *ptr) {
 			Node *lhs = ptr -> son;
 			Node *rhs = ptr -> son -> brother;
 
+			if(lhs -> token.number == ASSIGN_OP && rhs -> token.number == ASSIGN_OP)
+				flag = 1;
+
 			// step 1 : generate instructions for left-hand side if INDEX node.
 			if(lhs -> noderep == nonterm) {
 				lvalue = 1;
 				processOperator(lhs);
 				lvalue = 0;
 			}
-
 			// step 2 : generate instructions for right-hand side
-			if(rhs -> noderep == nonterm) processOperator(rhs);
+			if(rhs -> noderep == nonterm) {
+				rvalue = 1;
+				processOperator(rhs);
+				rvalue = 0;
+			}
 
-			else
+			else{
 				rv_emit(rhs);
+			}
+			
 
 			//step 3 : generate a store instruction
 			if(lhs -> noderep == terminal) {
@@ -133,7 +151,8 @@ void processOperator(Node *ptr) {
 				if(stIndex == -1) {
 					printf("undefined variable: %s\n", lhs -> token.value.id);
 					return;
-				}
+				}		
+
 				emit2("str",symbolTable[stIndex].base, symbolTable[stIndex].offset);
 			} else
 				emit0("sti");
@@ -170,6 +189,9 @@ void processOperator(Node *ptr) {
 				processOperator(rhs);
 			else
 				rv_emit(rhs);
+
+
+
 			// step 4 : emit the correspoinding operation code			
 			switch(ptr -> token.number) {
 				case ADD_ASSIGN: emit0("add");	break;
@@ -221,7 +243,13 @@ void processOperator(Node *ptr) {
 				case LOGICAL_AND:	emit0("and");	break;
 				case LOGICAL_OR:	emit0("or");	break;
 			}
+			if(flag == 1){
+				emit0("dup");
+				flag = 0;
+			}
 			break;
+
+
 		}
 
 		case UNARY_MINUS:	case LOGICAL_NOT:
@@ -254,7 +282,8 @@ void processOperator(Node *ptr) {
 
 			emit2("lda", symbolTable[stIndex].base, symbolTable[stIndex].offset);
 			emit0("add");
-			if(!lvalue)	emit0("ldi");
+
+			if(!lvalue) emit0("ldi");
 			break;
 		}
 		// increment / decrement operatiors
@@ -295,7 +324,6 @@ void processOperator(Node *ptr) {
 				lvalue = 1;
 				processOperator(p);
 				lvalue = 0;
-				emit0("swp");
 				emit0("sti");
 			}
             else printf("error increase/decrease operators\n");
@@ -360,7 +388,6 @@ void processStatement(Node *ptr) {
 
 		case RETURN_ST:
 			if (ptr -> son != NULL) {
-				returnWithValue = 1;				
 				p = ptr -> son;
 				if(p -> noderep == nonterm)
 					processOperator(p);
@@ -427,10 +454,13 @@ void processFuncHeader(Node *ptr) {
 	int stIndex;
 	Node *p = ptr;
 
-	printf("processFunctionHeader");
+	printf("processFunctionHeader\n\n");
 
-	if(ptr -> token.number != FUNC_HEAD)
+	if(ptr -> token.number != FUNC_HEAD){
 		printf("error in processFunctionHeader!\n");
+		printTree(ptr,0);
+		exit(1);
+	}
 
 	// step 1 : process the function return type
 	p = ptr -> son -> son;
@@ -465,10 +495,12 @@ void codeGen(Node *ptr) {
 	int globalSize;
 
 	initSymbolTable();
-
 	// step 1 : process the declaration part
-	for(p = ptr -> son; p ; p -> brother){
-		if(p -> token.number == DCL)	processDeclaration(p -> son);
+	for(p = ptr -> son; p; p = p -> brother){
+		if(p -> token.number == DCL){	
+			printf("\n\n\n");
+			processDeclaration(p -> son);
+		}
 		else if(p -> token.number == FUNC_DEF) processFuncHeader(p -> son);
 		else icg_error(3);
 	}
@@ -480,7 +512,7 @@ void codeGen(Node *ptr) {
 	genSym(base);
 
 	// step 2 : process the function part
-	for(p = ptr -> son; p ;p = p -> brother)
+	for(p = ptr -> son; p;p = p -> brother)
 		if(p -> token.number == FUNC_DEF) processFunction(p);
 	//if(!mainExist) warningmsg("main does not exist");
 
@@ -501,12 +533,11 @@ int checkPredefined(Node *ptr) {
 	if(strcmp(functionName,"read") == 0) {
 		noArguments = 1;
 		emit0("ldp");
-		p = p -> brother -> son;
+		p = p -> brother;
 		while(p) {
 			if(p->noderep == nonterm)
 				processOperator(p);
 			else {
-				findTable = table;
 				stIndex = lookup(p -> token.value.id);
 
 				if(stIndex == -1)
@@ -527,12 +558,13 @@ int checkPredefined(Node *ptr) {
 	else if(strcmp(functionName, "write") == 0) {
 		noArguments = 1;
 		emit0("ldp");
-		p = p -> brother -> son;
+		p = p -> brother;
 		while(p) {
 			if(p -> noderep == nonterm)
 				processOperator(p);
 			else {
 				stIndex = lookup(p -> token.value.id);
+
 				if(stIndex == -1)
 					return 0;
 
@@ -556,7 +588,13 @@ int checkPredefined(Node *ptr) {
 
 void processFunction(Node *ptr) { 
 	Node *p;
+	int i;
+	
+	printf("prcessFunction\n\n");
+	printTree(ptr,0);
+	// process function header
 
+	// process function body
 	// step 1 : process formal parameters
 	if(ptr -> son -> son -> brother -> brother -> son) {	// PARAM_DCL
 		for(p = ptr -> son -> son -> brother -> brother -> son; p ; p = p -> brother) {
@@ -567,17 +605,18 @@ void processFunction(Node *ptr) {
 	}
 
 	// step 2 : process the declaration part in function body
-	for(p = ptr -> son -> brother -> son -> son; p ; p = p->brother) {
+	for(p = ptr -> son -> brother -> son -> son; p  ; p = p->brother) {
 		if(p->token.number == DCL)
 			processDeclaration(p -> son);
-		else 	return;
+		else return;
 	}
 
 	// step 3 : emit the funtion start code
-	emitProc(ptr -> son -> son -> brother -> token.value, symbolTable[symbolTableTop].offset-1, symbolTable[symbolTableTop].base, 2);
+	emitFunc("fun", offset-1, base, 2);
  	
-	for(int i = 0; i < newTable->count; i++)
-		emitSym("sym", symbolTable[i].base, symbolTable[i].offset, symbolTable[i].width);
+	for(i = 0;i < symbolTableTop; i++){
+		genSym(i);
+	}
 
 	// step 4 : process the statement part in function body	
 	for(p = ptr->son; p; p = p->brother) {
@@ -586,10 +625,8 @@ void processFunction(Node *ptr) {
 	}
 
 	// step 5 : check if return check if return type and return value
-	if(!returnFlag) emit0("ret");
+	emit0("ret");
 
 	// step 6 : generate the ending codes
 	emit0("end");
-
-	free(newTable);
 }

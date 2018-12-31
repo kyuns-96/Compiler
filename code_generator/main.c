@@ -4,13 +4,13 @@
 #include "scanner.c"
 #include "code_generator.c"
 
+FILE *sourceFile;
 FILE *astFile;
 FILE *ucodeFile;
 
 void main (int argc, char *argv[]){
 	char fileName[30];
 	Node *root;
-
 	printf(" *** start of Mini C Compiler\n");
 	if(argc != 2){
 		icg_error(1);
@@ -30,9 +30,8 @@ void main (int argc, char *argv[]){
 
 	printf(" === start of Parser\n");
 	root = parser();
-	printTree(root, 0);
 	printf(" === start of ICG\n");
-	codeGen(root, 0);
+	codeGen(root);
 	printf(" *** end of Mini C Compiler\n");
 } //end of main
 

@@ -1,0 +1,97 @@
+
+ line       object           ucode  source program
+
+   1    (35    5    2)     main       fun  5  2  2  
+   2    (38    2    1)                sym  2  1  1  ; int i
+   3    (38    2    2)                sym  2  2  1  ; int j
+   4    (38    2    3)                sym  2  3  1  ; int k
+   5    (38    2    4)                sym  2  4  1  ; int rem
+   6    (38    2    5)                sym  2  5  1  ; int sum
+   7    (20    2     )                ldc  2        ; load 2
+   8    (24    2    1)                str  2  1     ; i = 2
+   9    (34          )     $$0        nop 
+  10    (19    2    1)                lod  2  1     ; load i
+  11    (20  500     )                ldc  500      ; load max : 500
+  12    (16          )                le            ; i <= max
+  13    (28   59     )                fjp  $$1      ; while(i <= max)
+  14    (20    0     )                ldc  0        ; load 0
+  15    (24    2    5)                str  2  5     ; sum = 0
+  16    (19    2    1)                lod  2  1     ; load i
+  17    (20    2     )                ldc  2        ; load 2
+  18    ( 9          )                div           ; i / 2
+  19    (24    2    3)                str  2  3     ; k = i / 2
+  20    (20    1     )                ldc  1        ; load 1
+  21    (24    2    2)                str  2  2     ; j = 1
+  22    (34          )     $$2        nop
+  23    (19    2    2)                lod  2  2     ; load j
+  24    (19    2    3)                lod  2  3     ; load k
+  25    (16          )                le            ; j <= k
+  26    (28   45     )                fjp  $$3      ; while(j <= k)
+  27    (19    2    1)                lod  2  1     ; load i 
+  28    (19    2    2)                lod  2  2     ; load j
+  29    (10          )                mod           ; i % j
+  30    (24    2    4)                str  2  4     ; rem = i % j
+  31    (19    2    4)                lod  2  4     ; load rem
+  32    (20    0     )                ldc  0        ; load 0
+  33    (17          )                eq            ; rem == 0
+  34    (28   39     )                fjp  $$4      ; if(rem == 0)
+  35    (19    2    5)                lod  2  5     ; load sum
+  36    (19    2    2)                lod  2  2     ; load j
+  37    ( 6          )                add           ; sum + j
+  38    (24    2    5)                str  2  5     ; sum = sum + j
+  39    (34          )     $$4        nop
+  40    (19    2    2)                lod  2  2     ; load j
+  41    (20    1     )                ldc  1        ; load 1
+  42    ( 6          )                add           ; j + 1
+  43    (24    2    2)                str  2  2     ; j = j + 1
+  44    (26   22     )                ujp  $$2      ; while(j <= k) close
+  45    (34          )     $$3        nop
+  46    (19    2    1)                lod  2  1     ; load i
+  47    (19    2    5)                lod  2  5     ; load sum
+  48    (17          )                eq            ; i == sum
+  49    (28   53     )                fjp  $$5      ; if(i == sum)
+  50    (23          )                ldp
+  51    (19    2    1)                lod  2  1     ; load i
+  52    (29   -2     )                call  write   ; write(i)
+  53    (34          )     $$5        nop
+  54    (19    2    1)                lod  2  1     ; load i
+  55    (20    1     )                ldc  1        ; load 1
+  56    ( 6          )                add           ; i + 1
+  57    (24    2    1)                str  2  1     ; i = i + 1
+  58    (26    9     )                ujp  $$0      ; while(i <= max)
+  59    (34          )     $$1        nop
+  60    (30          )                ret
+  61    (36          )                end
+  62    (37    0     )                bgn  0
+  63    (23          )                ldp
+  64    (29    1     )                call  main
+  65    (36          )                end
+
+
+   ****    Result    ****
+
+ 6 28 496
+
+
+             ##### Statistics #####
+
+
+    ****  Static Instruction Counts  ****
+
+add    =  3       div    =  1       mod    =  1       le     =  2       
+eq     =  2       lod    =  14      ldc    =  8       ldp    =  2       
+str    =  8       ujp    =  2       fjp    =  4       call   =  2       
+ret    =  1       nop    =  6       fun    =  1       end    =  2       
+bgn    =  1       sym    =  5       
+
+    ****  Dynamic instruction counts  ****
+
+add    =  65689     div    =  499       mod    =  62500     le     =  63499     
+eq     =  62999     lod    =  383877    ldc    =  127497    ldp    =  4         
+str    =  129687    ujp    =  62999     fjp    =  126498    call   =  4         
+ret    =  1         nop    =  126998    fun    =  1         end    =  1         
+bgn    =  1         sym    =  5         
+
+ Executable instruction count  =   1085754
+
+ Total execution cycle         =   14587245

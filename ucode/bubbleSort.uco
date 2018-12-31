@@ -1,0 +1,124 @@
+main       func  105  2  2
+           sym  2  1  100     ; int list[100]
+           sym  2  101  1     ; int element
+           sym  2  102  1     ; int total
+           sym  2  103  1     ; int i
+           sym  2  104  1     ; int top
+           sym  2  105  1     ; int temp
+           ldc  1             ; load 1
+           str  2  103        ; i = 1
+           ldp
+           lda  2  101        ; parameter-element
+           call read          ; read(element)
+arr_insert nop
+           lod  2  101        ; load element
+           ldc  0             ; load 0
+           ne                 ; element != 0
+           fjp  arr_close     ; while(element != 0)
+           lod  2  103        ; load i
+           lda  2  1          ; load list
+           add                ; list[i]
+           lod  2  101        ; load element
+           sti                ; list[i] = element
+           lod  2  103        ; i
+           ldc  1             ; load i
+           add                ; i + 1
+           str  2  103        ; i = i + 1
+           ldp 
+           lda  2  101        ; parameter-element
+           call read          ; read(element)
+           ldp
+           ujp  arr_insert    ; while(element != 0) close
+arr_close  nop
+           lod  2  103        ; load i
+           ldc  1             ; load 1
+           sub                ; i - 1
+           str  2  103        ; i = i - 1
+           lod  2  103
+           lod  2  103
+           str  2  104        ; top = i - 1
+           str  2  102        ; total = i - 1
+top_ctl    nop
+           lod  2  104        ; load top
+           ldc  1             ; load 1
+           gt
+           fjp  end_top       ; while(top > 1)
+           ldc  1             ; load 1
+           str  2  103        ; i = 1
+start_swap nop
+           lod  2  103        ; load i
+           lod  2  104        ; load top
+           lt                 ; i < top
+           fjp  end_swap      ; while(i < top)
+           lod  2  103        ; load i
+           lda  2  1          ; load list
+           add                ; list[i]
+           ldi                ; load list[i]
+           lod  2  103        ; load i
+           ldc  1             ; load 1
+           lda  2  1          ; load list
+           add
+           add                ; list[i + 1]
+           ldi                ; load list[i + 1]
+           gt                 ; list[i] > list[i+1]
+           fjp  bubble        ; if(list[i] > list[i+1]) is false
+           lod  2  103        ; load i
+           lda  2  1          ; load list
+           add                ; list[i]
+           ldi                ; load list[i]
+           str  2  105        ; temp = list[i]        
+           lod  2  103        ; load i
+           lda  2  1          ; load list
+           add                ; list[i]
+           lod  2  103        ; load i
+           ldc  1             ; load 1
+           lda  2  1          ; load list
+           add
+           add                ; list[i + 1] 
+           ldi                ; load list[i+1]
+           sti                ; list[i] = list[i + 1]
+           lod  2  103        ; load i
+           ldc  1             ; i + 1
+           lda  2  1          ; load list
+           add
+           add                ; list[i + 1]
+           lod  2  105        ; load temp
+           sti                ; list[i + 1] = temp;
+bubble     nop
+           lod  2  103        ; load i
+           ldc  1             ; i + 1
+           add
+           str  2  103        ; i = i + 1
+           ujp start_swap     ; while(i < top) close
+end_swap   nop
+           lod  2  104        ; load top
+           ldc  1             ; load 1
+           sub                ; top - 1
+           str  2  104        ; top = top - 1
+           ujp top_ctl        ; while(top > 1) close
+end_top    nop
+           ldc  1             ; load 1
+           str  2  103        ; i = 1
+print_arr  nop
+           lod  2  103        ; load i
+           lod  2  102        ; load total
+           le                 ; i <= total
+           fjp exit           ; exit           
+           ldp
+           lod  2  103        ; load i
+           lda  2  1          ; load list
+           add                ; list[i] 
+           ldi 
+           call write         ; write(list[i])
+           lod  2  103        ; load i
+           ldc  1             ; i + 1
+           add                
+           str  2  103        ; i = i + 1
+           ujp print_arr      ; print_arr
+exit       nop
+           ret
+           end
+           bgn  0
+           ldp
+           call  main
+           end
